@@ -14,7 +14,9 @@ not drawn by hand.
 | Fig 3 | [The planes](site/figures/planes.html) | the four planes a tile owns, and how they are summed into published cells |
 | Fig 4 | [The balance](site/figures/balance.html) | derived layers: a formula over other layers, maintained only where its inputs changed |
 
-Open `site/index.html` in a browser, or read it online at the published URL.
+Open `site/index.html` in a browser, or read it online:
+
+**https://zox4cv6h5f2d0.space.minimax.io**
 
 ## The rules these figures follow
 
