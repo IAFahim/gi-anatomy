@@ -1,0 +1,8 @@
+This repository vendors the "Anatomy" isometric drawing kit, MIT licensed,
+Copyright (c) 2026 Ryan, from https://github.com/wheresryan22/anatomy.
+Its licence is kept verbatim in kit/LICENSE.
+
+The figures explain Gi, https://github.com/IAFahim/grid-influence, which is
+MIT licensed and Copyright (c) 2026 IAFahim. No Gi source code is included
+here: the figures are driven by an independent model of Gi's published
+semantics, written from its documentation and its kernel dumps.

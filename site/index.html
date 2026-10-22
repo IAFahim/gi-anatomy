@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anatomy of Gi — how the grid-influence algorithm works</title>
+<meta name="description" content="Interactive isometric figures that explain Gi's algorithm: the change-rate deposit cycle, the max pyramid, and the planes a tile owns.">
+<style>
+.iso{
+  --anatomy-page:#0b0b0b;--anatomy-card:#131313;--anatomy-text:#a3a3a3;--anatomy-strong:#e6e6e6;--anatomy-muted:#6e6e6e;
+  --anatomy-paper:#131313;--anatomy-face:#1b1b1b;--anatomy-top:#1c1c1c;
+  --anatomy-shade-0:#0f0f0f;--anatomy-shade-1:#121212;--anatomy-shade-2:#151515;--anatomy-shade-3:#181818;
+  --anatomy-lit-top:#262626;--anatomy-lit-shade:#1d1d1d;
+  --anatomy-hi:#d4d4d4;--anatomy-mid:#6a6a6a;--anatomy-lo:#3e3e3e;--anatomy-faint:#2a2a2a;--anatomy-lit:#ffffff;
+  --anatomy-halo:#050505;--anatomy-halo-opacity:.9;--anatomy-dot:#e6e6e6;
+  --anatomy-red:#ff6b6b;--anatomy-green:#6be0a0;--anatomy-blue:#6b9bff;
+  --anatomy-weight:.6px;--anatomy-ease:cubic-bezier(.32,.72,0,1);
+  --anatomy-mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --anatomy-lift:inset 0 1px 0 0 #ffffff0a,inset 0 0 0 1px #ffffff06,0 0 0 1px #00000026,0 1px 1px -.5px #00000014,0 3px 3px -1.5px #00000014,0 6px 6px -3px #00000014,0 12px 12px -6px #00000014;
+}
+.iso[data-theme="light"]{
+  --anatomy-page:#f2f2ef;--anatomy-card:#fbfbfa;--anatomy-text:#57575a;--anatomy-strong:#18181a;--anatomy-muted:#8c8c90;
+  --anatomy-paper:#fbfbfa;--anatomy-face:#ffffff;--anatomy-top:#ffffff;
+  --anatomy-shade-0:#dcdcd9;--anatomy-shade-1:#e5e5e2;--anatomy-shade-2:#ededea;--anatomy-shade-3:#f4f4f1;
+  --anatomy-lit-top:#ffffff;--anatomy-lit-shade:#eeeeeb;
+  --anatomy-hi:#26262a;--anatomy-mid:#8a8a8f;--anatomy-lo:#b4b4b8;--anatomy-faint:#d4d4d6;--anatomy-lit:#000000;
+  --anatomy-halo:#8a8a80;--anatomy-halo-opacity:.32;--anatomy-dot:#3a3a3e;
+  --anatomy-red:#e5484d;--anatomy-green:#30a46c;--anatomy-blue:#3e63dd;
+  --anatomy-lift:inset 0 1px 0 0 #ffffff,0 0 0 1px #0000000f,0 1px 1px -.5px #0000000a,0 3px 3px -1.5px #0000000a,0 6px 6px -3px #0000000a,0 12px 12px -6px #0000000a;
+}
+.iso-svg{display:block;width:100%;height:auto;overflow:visible}
+.iso-svg path,.iso-svg circle{vector-effect:non-scaling-stroke}
+.iso-fill{fill:var(--anatomy-paper);stroke:none}
+.iso-solid[data-lit]>.iso-fill{fill:var(--anatomy-face)}
+.iso-shade,.iso-top{stroke:none}
+.iso-shade[data-shade="0"]{fill:var(--anatomy-shade-0)}
+.iso-shade[data-shade="1"]{fill:var(--anatomy-shade-1)}
+.iso-shade[data-shade="2"]{fill:var(--anatomy-shade-2)}
+.iso-shade[data-shade="3"]{fill:var(--anatomy-shade-3)}
+.iso-top{fill:var(--anatomy-top)}
+.iso-solid[data-lit]>.iso-top{fill:var(--anatomy-lit-top)}
+.iso-solid[data-lit]>.iso-shade{fill:var(--anatomy-lit-shade)}
+.iso-solid[data-seamless]>.iso-shade,.iso-solid[data-seamless]>.iso-top{stroke-width:.4;stroke-linejoin:round}
+.iso-solid[data-seamless]>.iso-shade[data-shade="0"]{stroke:var(--anatomy-shade-0)}
+.iso-solid[data-seamless]>.iso-shade[data-shade="1"]{stroke:var(--anatomy-shade-1)}
+.iso-solid[data-seamless]>.iso-shade[data-shade="2"]{stroke:var(--anatomy-shade-2)}
+.iso-solid[data-seamless]>.iso-shade[data-shade="3"]{stroke:var(--anatomy-shade-3)}
+.iso-solid[data-seamless]>.iso-top{stroke:var(--anatomy-top)}
+.iso-solid[data-seamless][data-lit]>.iso-top{stroke:var(--anatomy-lit-top)}
+.iso-solid[data-seamless][data-lit]>.iso-shade{stroke:var(--anatomy-lit-shade)}
+.iso-solid[data-lit]>.iso-edge{stroke:var(--anatomy-lit)}
+.iso-halo{fill:var(--anatomy-halo);stroke:none;filter:blur(9px);opacity:var(--anatomy-halo-opacity);transform:translateY(3px)}
+.iso-line{fill:none;stroke:var(--anatomy-lo);stroke-width:var(--anatomy-weight);stroke-linecap:round;stroke-linejoin:round}
+.iso-line[data-tone="hi"]{stroke:var(--anatomy-hi)}
+.iso-line[data-tone="mid"]{stroke:var(--anatomy-mid)}
+.iso-line[data-tone="lo"]{stroke:var(--anatomy-lo)}
+.iso-line[data-tone="faint"]{stroke:var(--anatomy-faint)}
+.iso-line[data-tone="lit"]{stroke:var(--anatomy-lit)}
+.iso-line[data-tone="red"]{stroke:var(--anatomy-red)}
+.iso-line[data-tone="green"]{stroke:var(--anatomy-green)}
+.iso-line[data-tone="blue"]{stroke:var(--anatomy-blue)}
+.iso-line[data-dotted]{stroke-dasharray:.01 3.5;stroke-width:1}
+.iso-line[data-dashed]{stroke-dasharray:3 3}
+.iso-line[data-flow]{stroke-dasharray:2 6}
+.iso-wire-end{fill:var(--anatomy-paper);stroke:var(--anatomy-lo);stroke-width:var(--anatomy-weight)}
+.iso-wire[data-tone="hi"] .iso-wire-end{stroke:var(--anatomy-hi)}
+.iso-wire[data-tone="mid"] .iso-wire-end{stroke:var(--anatomy-mid)}
+.iso-wire[data-tone="faint"] .iso-wire-end{stroke:var(--anatomy-faint)}
+.iso-wire[data-tone="lit"] .iso-wire-end{stroke:var(--anatomy-lit)}
+.iso-dots circle{fill:var(--anatomy-dot);stroke:none;opacity:.32}
+.iso-dots[data-tone="hi"] circle{opacity:.85}
+.iso-dots[data-tone="mid"] circle{opacity:.45}
+.iso-dots[data-tone="lo"] circle{opacity:.22}
+.iso-dots[data-tone="faint"] circle{opacity:.12}
+.iso-face-text{fill:var(--anatomy-mid);font-family:var(--anatomy-mono);letter-spacing:.04em}
+.iso-face-text[data-tone="hi"]{fill:var(--anatomy-hi)}
+.iso-face-text[data-tone="lo"]{fill:var(--anatomy-lo)}
+.iso-face-text[data-tone="faint"]{fill:var(--anatomy-faint)}
+.tb-body{fill:var(--anatomy-shade-2);stroke:none}
+.tb-shine{fill:var(--anatomy-top);stroke:none}
+.tb-shade{fill:var(--anatomy-shade-0);stroke:none}
+.tb-ring{fill:none;stroke:var(--anatomy-lo);stroke-width:.45;stroke-linecap:butt;stroke-linejoin:round}
+.tb-ring[data-tone="mid"]{stroke:var(--anatomy-mid)}
+.tb-ring[data-tone="faint"]{stroke:var(--anatomy-faint)}
+.tb-ring[data-tone="hi"]{stroke:var(--anatomy-hi)}
+@keyframes iso-flow{to{stroke-dashoffset:-32}}
+@keyframes iso-pulse{0%,100%{opacity:.18}12%{opacity:1}40%{opacity:.18}}
+.iso-line[data-flow]{animation:iso-flow 1600ms linear infinite}
+.iso-dots circle[data-pulse]{animation:iso-pulse 1600ms steps(1,end) infinite;animation-delay:var(--pulse-at,0ms)}
+.iso-figure{margin:32px 0 36px}
+.iso-plate{position:relative;padding:52px 24px;border-radius:0;background:var(--anatomy-card);box-shadow:0 0 0 1px var(--anatomy-mid);--anatomy-paper:var(--anatomy-card)}
+.iso-plate-corners{position:absolute;inset:18px 20px;pointer-events:none}
+.iso-plate-corner{position:absolute;color:var(--anatomy-muted);font-family:var(--anatomy-mono);font-size:10.5px;line-height:1;letter-spacing:.04em;white-space:nowrap}
+.iso-plate-corner[data-corner="fig"]{top:0;left:0;color:var(--anatomy-text)}
+.iso-plate-corner[data-corner="title"]{top:0;right:0;text-transform:uppercase;letter-spacing:.1em}
+.iso-plate-corner[data-corner="hint"]{bottom:0;left:0;text-transform:uppercase;letter-spacing:.1em}
+.iso-plate-corner[data-corner="readout"]{right:0;bottom:0;color:var(--anatomy-text);font-variant-numeric:tabular-nums}
+.iso-plate .iso-svg{margin:0 auto}
+.iso-legend{display:grid;gap:8px;margin-top:12px;color:var(--anatomy-muted);font-size:13px;line-height:1.55}
+.iso-keys{display:flex;flex-wrap:wrap;gap:6px 18px}
+.iso-key{display:inline-flex;align-items:center;gap:7px}
+.iso-swatch{width:16px;height:10px;flex:none;overflow:visible}
+.iso-swatch path{fill:none;stroke:var(--anatomy-hi);stroke-width:1;vector-effect:non-scaling-stroke;stroke-linejoin:round;stroke-linecap:round}
+.iso-swatch[data-mark="raised"] path,.iso-swatch[data-mark="flat"] path{stroke:var(--anatomy-mid)}
+.iso-swatch[data-mark="lit"] path{stroke:var(--anatomy-lit)}
+.iso-swatch[data-mark="dim"] path{stroke:var(--anatomy-lo)}
+.iso-swatch[data-mark="dotted"] path{stroke-dasharray:.01 3;stroke-width:1.4}
+.iso-swatch[data-mark="dashed"] path{stroke-dasharray:3 2.5}
+.iso-swatch[data-mark="red"] path{stroke:var(--anatomy-red)}
+.iso-swatch[data-mark="green"] path{stroke:var(--anatomy-green)}
+.iso-swatch[data-mark="blue"] path{stroke:var(--anatomy-blue)}
+.iso-swatch-crease{stroke:var(--anatomy-lo)!important}
+@media (max-width:560px){.iso-plate{padding:48px 12px 70px}.iso-plate-corner[data-corner="hint"]{bottom:18px}}
+@media (prefers-reduced-motion:reduce){.iso-line[data-flow],.iso-dots circle[data-pulse]{animation:none}}
+
+*{box-sizing:border-box}
+html{color-scheme:dark}
+body[data-theme="light"]{color-scheme:light}
+body{margin:0;background:var(--anatomy-page);color:var(--anatomy-text);font:14px/1.65 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+.iso-page{width:min(720px,100% - 32px);margin:56px auto 96px}
+.iso-page.wide{width:min(980px,100% - 32px)}
+
+.site-head{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;width:min(720px,100% - 32px);margin:28px auto 0;padding-bottom:14px;border-bottom:1px solid #ffffff12}
+.site-head.wide{width:min(980px,100% - 32px)}
+.site-title{font:600 13px/1.4 var(--anatomy-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--anatomy-strong);text-decoration:none}
+.site-title span{color:var(--anatomy-muted)}
+.site-nav{display:flex;gap:14px;flex-wrap:wrap;margin-left:auto}
+.site-nav a{font:400 12px/1.4 var(--anatomy-mono);color:var(--anatomy-muted);text-decoration:none;padding:2px 0;border-bottom:1px solid transparent}
+.site-nav a:hover{color:var(--anatomy-text)}
+.site-nav a[aria-current="page"]{color:var(--anatomy-strong);border-bottom-color:#ffffff30}
+
+h1{font:500 26px/1.25 var(--anatomy-mono);color:var(--anatomy-strong);letter-spacing:-.01em;margin:0 0 6px}
+h2{font:500 15px/1.4 var(--anatomy-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--anatomy-strong);margin:44px 0 14px}
+.lede p{margin:0 0 10px;max-width:62ch}
+.lede .kicker{font:400 12px/1.5 var(--anatomy-mono);color:var(--anatomy-muted);margin:0 0 10px}
+
+.notes{max-width:62ch}
+.notes ul{margin:0;padding-left:18px}
+.notes li{margin:0 0 7px}
+.notes code,.mono{font:400 .92em var(--anatomy-mono);color:var(--anatomy-strong);background:#ffffff0d;padding:1px 5px;border-radius:3px}
+.source{margin-top:26px;padding-top:14px;border-top:1px solid #ffffff12;font:400 12px/1.6 var(--anatomy-mono);color:var(--anatomy-muted)}
+
+.cards{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));margin:22px 0 0;padding:0;list-style:none}
+.card{display:block;padding:18px 20px 20px;border:1px solid #ffffff12;border-radius:10px;background:var(--anatomy-card);text-decoration:none;color:inherit;overflow:hidden}
+.card:hover{border-color:#ffffff28}
+.card img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;object-position:center 38%;margin:10px -20px 12px;border-bottom:1px solid #ffffff12;background:#000}
+.card .n{font:400 11px/1.4 var(--anatomy-mono);color:var(--anatomy-muted);letter-spacing:.12em}
+.card h3{margin:8px 0 8px;font:500 16px/1.35 var(--anatomy-mono);color:var(--anatomy-strong)}
+.card p{margin:0 0 10px;font-size:13px;line-height:1.6}
+.card .needs{font:400 11px/1.5 var(--anatomy-mono);color:var(--anatomy-muted)}
+
+.steps{counter-reset:step;margin:0;padding:0;list-style:none;max-width:62ch}
+.steps li{position:relative;padding:0 0 18px 44px;margin:0}
+.steps li:before{counter-increment:step;content:counter(step);position:absolute;left:0;top:1px;width:26px;height:26px;border:1px solid #ffffff22;border-radius:50%;font:400 12px/25px var(--anatomy-mono);text-align:center;color:var(--anatomy-strong)}
+.steps strong{color:var(--anatomy-strong);font-weight:500}
+.steps em{font-style:normal;color:var(--anatomy-muted)}
+</style>
+</head>
+<body class="iso" data-theme="dark">
+<header class="site-head"><a class="site-title" href="index.html">Anatomy <span>of Gi</span></a><nav class="site-nav"><a href="index.html" aria-current="page">index</a><a href="figures/field-bench.html">fig 1</a><a href="figures/pyramid.html">fig 2</a><a href="figures/planes.html">fig 3</a><a href="figures/balance.html">fig 4</a></nav></header>
+<main class="iso-page">
+
+<div class="lede">
+  <p class="kicker">Anatomy of Gi</p>
+  <h1>How the grid-influence algorithm works</h1>
+  <p>Gi is a sparse tiled integer influence field for .NET. It never redraws the world: it redraws the tiles that changed, publishes them exactly, and answers queries by descending a hierarchy instead of scanning. These figures are that algorithm, drawn as machines — every number in them is produced by the library's own semantics.</p>
+</div>
+
+<h2>The algorithm in five moves</h2>
+<ol class="steps">
+  <li><strong>Place a source, change nothing.</strong> A source is a column: a position, a kernel, a gain. Placing or moving it writes that column and marks the slot on the changed list. No tile is touched, because a tile is only ever written by a publish. <span class="mono">Fig 1</span></li>
+  <li><strong>Process: re-emit only what changed.</strong> Process compares each marked source against the 16-byte record of what it last deposited. Where the two differ it adds the negated old taps and the new taps. Integer adds commute, so any sequence of mutations collapses to the same field. <span class="mono">Fig 1</span></li>
+  <li><strong>Publish: the planes become cells.</strong> A tile owns four planes. They are summed into the short cells only at publish, and the sum is taken after summation, so a deposit that cancels another leaves exactly zero. Only the cells that differ are stored. <span class="mono">Fig 3</span></li>
+  <li><strong>Query: descend, never scan.</strong> A region sum adds one int64 per fully covered tile. A best-cell query descends a max pyramid: root, node, tile, cell. Eighty numbers and one 2 048 B page stand in for a million cells. <span class="mono">Fig 2</span></li>
+  <li><strong>Combine: derived layers.</strong> A derived layer is a formula over other layers — food minus twice the threat. It is maintained only on the tiles whose inputs changed, and every query works on it as if it were any other layer.</li>
+</ol>
+
+<h2>The figures</h2>
+<ul class="cards">
+<a class="card" href="figures/field-bench.html">
+    <span class="n">Fig 1</span>
+    <img src="previews/bench.png" alt="" loading="lazy">
+    <h3>The field bench</h3>
+    <p>A press that stamps a shaped die into one tile of the field. Moving the die changes nothing until the press cycles — then the old footprint is lifted exactly and only the touched tiles are republished.</p>
+    <span class="needs">the change-rate deposit cycle</span>
+  </a>
+<a class="card" href="figures/pyramid.html">
+    <span class="n">Fig 2</span>
+    <img src="previews/pyramid.png" alt="" loading="lazy">
+    <h3>The pyramid</h3>
+    <p>The grid is a ziggurat of tiles and nodes. A query for the best cell descends it instead of scanning, so 65 536 cells become a handful of reads.</p>
+    <span class="needs">how queries never scan</span>
+  </a>
+<a class="card" href="figures/planes.html">
+    <span class="n">Fig 3</span>
+    <img src="previews/planes.png" alt="" loading="lazy">
+    <h3>The planes</h3>
+    <p>Every tile owns four planes. Deposits land in the plane that suits their kernel, and the planes are summed into short cells only at publish time.</p>
+    <span class="needs">how a deposit becomes a cell</span>
+  </a>
+<a class="card" href="figures/balance.html">
+    <span class="n">Fig 4</span>
+    
+    <h3>The balance</h3>
+    <p>A derived layer is a formula over other layers: food minus twice the threat. It is maintained only on the tiles whose inputs changed.</p>
+    <span class="needs">how channels combine</span>
+  </a>
+</ul>
+
+<div class="notes">
+  <h2>What these are not</h2>
+  <ul>
+    <li>They are not illustrations of an idea. Each figure is driven by a model of the library: the kernels are bit-exact against the dumps in Gi's README, and the field semantics are asserted against the library's own receipts.</li>
+    <li>They are not a rendering of Gi's internals. Gi is a native, unmanaged, allocation-free library; these are isometric drawings of the same arithmetic, built with the <span class="mono">Anatomy</span> kit.</li>
+  </ul>
+  <p class="source">Source: <span class="mono">github.com/IAFahim/grid-influence</span> — the library these figures explain. The figures themselves live in <span class="mono">github.com/IAFahim/gi-anatomy</span>.</p>
+</div>
+
+</main>
+
+</body>
+</html>
