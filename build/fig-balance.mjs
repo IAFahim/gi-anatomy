@@ -34,24 +34,26 @@ const TILT = tiltOf(MODEL);
 const PEAK = 90;               // the peak value of a stamp, in Gi's own units
 
 // ------------------------------------------------------------------ the bench
-const BASE = { x: -262, y: -104, w: 500, d: 192, r: 14 };
+const BASE = { x: -152, y: -86, w: 322, d: 178, r: 14 };
 const BASE_H = 13;
 
 // ------------------------------------------------------------------ the balance
-const PIVOT = { x: -62, y: -38, z: 94 };
-const ARM = 112;               // the beam's half length
-const CORD = 44;               // the length of the cords a pan hangs on
-const PAN_H = 10;              // the depth of a pan
+const PIVOT = { x: -58, y: -42, z: 78 };
+const ARM = 62;                // the beam's half length
+const CORD = 30;               // the length of the cords a pan hangs on
+const PAN_H = 5;               // the depth of a pan
 const PAN_FLOOR = 3;           // the thickness of a pan's floor
+const PAN_SPAN = 52;           // a pan is 52 units across
 const TILE = 32;
 const CELLU = 3;
 const SPAN = TILE * CELLU;     // a tile is 96 units across
-const MOUND = 9;               // the height of the food dome's peak
+const LOAD_R = 18;             // a channel's footprint: six cells across
+const LOAD_H = 13;             // the height of the food dome
 const BEAM_R = 2.8;             // the radius of the beam
 const COLLAR_R = 3.6;           // the radius of the boss the cords hang from
 const COLLAR_L = 2;             // its length along the beam
-const CORD_R = 1.2;             // the radius of a cord
-const CORD_DOWN = 7.4;          // how far below the beam a cord leaves the boss
+const CORD_R = 0.9;             // the radius of a cord
+const CORD_DOWN = 5.4;          // how far below the beam a cord leaves the boss
 
 // The beam leans by the ratio of the two loads: the threat side goes down
 // when it is the heavier one.
@@ -64,17 +66,17 @@ const END = {
 const RIM = { food: END.food[2] - CORD, threat: END.threat[2] - CORD };
 const FLOOR = { food: RIM.food - PAN_H, threat: RIM.threat - PAN_H };
 const PLAN = {
-  food: { x: END.food[0] - SPAN / 2, y: PIVOT.y - SPAN / 2, w: SPAN, d: SPAN, r: 3 },
-  threat: { x: END.threat[0] - SPAN / 2, y: PIVOT.y - SPAN / 2, w: SPAN, d: SPAN, r: 3 },
+  food: { x: END.food[0] - PAN_SPAN / 2, y: PIVOT.y - PAN_SPAN / 2, w: PAN_SPAN, d: PAN_SPAN, r: 3 },
+  threat: { x: END.threat[0] - PAN_SPAN / 2, y: PIVOT.y - PAN_SPAN / 2, w: PAN_SPAN, d: PAN_SPAN, r: 3 },
 };
 
 // ------------------------------------------------------------------ the page
-const PAGE = { x: 120, y: -14, w: SPAN, d: SPAN, r: 3 };
+const PAGE = { x: 58, y: -6, w: SPAN, d: SPAN, r: 3 };
 const PAGE_T = 5;
 const PAGE_BASE = 20;
 
 // The calibration weights that live on the bench beside the balance.
-const WEIGHTS = { x: -252, y: 16, w: 84, d: 14, r: 2 };
+const WEIGHTS = { x: -140, y: 26, w: 84, d: 14, r: 2 };
 
 const P = k.fitProjection(
   [
@@ -132,7 +134,7 @@ function base() {
   for (const [x, y] of screws) shapes.push(A.cylinder(x, y, 2.2, 0, 0.4, { name: "stand.screw", owner: "rig" }));
 
   // The ruler along the front edge.
-  const strip = { x: -156, y: BASE.y + 6, w: 130, d: 7, r: 1 };
+  const strip = { x: -56, y: BASE.y + BASE.d - 16, w: 106, d: 7, r: 1 };
   out.push(S(k.slabOf(strip, 0, 0.7, P, 3), { tone: "lo", crease: "none" }));
   shapes.push(A.slab(strip, 0, 0.7, { name: "stand.ruler", owner: "rig" }));
   const ticks = k.topTicks(strip.x + 5, strip.x + strip.w - 5, 5, 4, strip.y + 0.9, 0.7, [2, 3.8], P);
@@ -168,26 +170,26 @@ function balance() {
   // The shaft, in three turned sections.
   out.push(S(k.cylinder(x, y, 7.6, 13, 8, P, 28), { tone: "mid" }));
   shapes.push(A.cylinder(x, y, 7.6, 13, 8, { name: "stand.shaftfoot", owner: "rig" }));
-  out.push(S(k.cylinder(x, y, 6.2, 21, 52, P, 28), { tone: "mid" }));
-  shapes.push(A.cylinder(x, y, 6.2, 21, 52, { name: "stand.shaft", owner: "rig" }));
-  out.push(S(k.cylinder(x, y, 8.4, 73, 6, P, 28), { tone: "mid" }));
-  shapes.push(A.cylinder(x, y, 8.4, 73, 6, { name: "stand.shaftcap", owner: "rig" }));
+  out.push(S(k.cylinder(x, y, 6.2, 21, 34, P, 28), { tone: "mid" }));
+  shapes.push(A.cylinder(x, y, 6.2, 21, 34, { name: "stand.shaft", owner: "rig" }));
+  out.push(S(k.cylinder(x, y, 8.4, 55, 6, P, 28), { tone: "mid" }));
+  shapes.push(A.cylinder(x, y, 8.4, 55, 6, { name: "stand.shaftcap", owner: "rig" }));
 
   // The capital the fulcrum stands on.
-  out.push(S(k.cylinder(x, y, 12, 79, 7, P, 30), { tone: "mid" }));
-  shapes.push(A.cylinder(x, y, 12, 79, 7, { name: "stand.capital", owner: "rig" }));
-  out.push(S(k.cylinder(x, y, 9, 86, 3.4, P, 26), { tone: "lo" }));
-  shapes.push(A.cylinder(x, y, 9, 86, 3.4, { name: "stand.crest", owner: "rig" }));
+  out.push(S(k.cylinder(x, y, 12, 61, 7, P, 30), { tone: "mid" }));
+  shapes.push(A.cylinder(x, y, 12, 61, 7, { name: "stand.capital", owner: "rig" }));
+  out.push(S(k.cylinder(x, y, 9, 68, 5.4, P, 26), { tone: "lo" }));
+  shapes.push(A.cylinder(x, y, 9, 68, 5.4, { name: "stand.crest", owner: "rig" }));
 
   // The zero adjuster: a knurled drum on a stub at the shaft's side.
   const knobX = x + 13;
-  out.push(S(k.cylinder(knobX, y, 2.2, 30, 2.2, P, 16), { tone: "lo" }));
-  shapes.push(A.cylinder(knobX, y, 2.2, 30, 2.2, { name: "stand.knobstub", owner: "rig" }));
-  out.push(S(k.cylinder(knobX, y, 6.4, 32.2, 7.4, P, 30), { tone: "mid" }));
-  shapes.push(A.cylinder(knobX, y, 6.4, 32.2, 7.4, { name: "stand.knob", owner: "rig" }));
-  out.push(L(k.knurl(knobX, y, 6.4, 32.2, 39.6, 18, P), { tone: "lo" }));
-  out.push(S(k.cylinder(knobX, y, 2.2, 39.6, 1.4, P, 16), { tone: "lo" }));
-  shapes.push(A.cylinder(knobX, y, 2.2, 39.6, 1.4, { name: "stand.knobcap", owner: "rig" }));
+  out.push(S(k.cylinder(knobX, y, 2.2, 24, 2.2, P, 16), { tone: "lo" }));
+  shapes.push(A.cylinder(knobX, y, 2.2, 24, 2.2, { name: "stand.knobstub", owner: "rig" }));
+  out.push(S(k.cylinder(knobX, y, 6.4, 26.2, 7.4, P, 30), { tone: "mid" }));
+  shapes.push(A.cylinder(knobX, y, 6.4, 26.2, 7.4, { name: "stand.knob", owner: "rig" }));
+  out.push(L(k.knurl(knobX, y, 6.4, 26.2, 33.6, 18, P), { tone: "lo" }));
+  out.push(S(k.cylinder(knobX, y, 2.2, 33.6, 1.4, P, 16), { tone: "lo" }));
+  shapes.push(A.cylinder(knobX, y, 2.2, 33.6, 1.4, { name: "stand.knobcap", owner: "rig" }));
 
   // The beam: a round rod through the fulcrum, leaning by the tilt.
   const axis = [CT, 0, -ST];
@@ -220,41 +222,60 @@ function balance() {
 }
 
 // ------------------------------------------------------------------ a pan
-// A deep tray that hangs from the beam on four cords, holding one channel as
-// a mound of standing cells: a dome for the food, a cone for the threat.
-// The three parts are separate items, so the audit can order the cords
-// against the tray and the mound by their true depth.
-function panTray(side) {
+// A shallow pan that hangs from the beam on four cords and carries one
+// channel. It is drawn in two parts, so the load can sit between them: the
+// floor and the far walls are behind the load, the near walls in front.
+function panFloor(side) {
+  const out = [];
+  const shapes = [];
+  const plan = PLAN[side];
+  const floor = FLOOR[side];
+
+  // The floor of the pan.
+  out.push(S(k.slabOf(plan, floor - PAN_FLOOR, PAN_FLOOR, P, 4, 0.6), { tone: "lo" }));
+  shapes.push(A.slab(plan, floor - PAN_FLOOR, PAN_FLOOR, { name: `stand.pan.${side}`, owner: "rig" }));
+
+  // The two far walls.
+  for (const bar of [
+    { x: plan.x, y: plan.y, w: plan.w, d: 3.2, r: 1 },
+    { x: plan.x, y: plan.y, w: 3.2, d: plan.d, r: 1 },
+  ]) {
+    out.push(S(k.slabOf(bar, floor, PAN_H, P, 3, 0.5), { tone: "lo" }));
+    shapes.push(A.slab(bar, floor, PAN_H, { name: `stand.panwall.${side}.far`, owner: "rig" }));
+  }
+  return { svg: out.join(""), shapes };
+}
+
+// The near half of the pan: the two walls the reader sees past, the rim and
+// the one mark in the drawing.
+function panNear(side) {
   const out = [];
   const shapes = [];
   const plan = PLAN[side];
   const rim = RIM[side];
   const floor = FLOOR[side];
 
-  // The floor of the tray, and its walls.
-  out.push(S(k.slabOf(plan, floor - PAN_FLOOR, PAN_FLOOR, P, 4, 0.6), { tone: "lo" }));
-  shapes.push(A.slab(plan, floor - PAN_FLOOR, PAN_FLOOR, { name: `stand.pan.${side}`, owner: "rig" }));
+  // The two near walls.
   for (const bar of [
-    { x: plan.x, y: plan.y, w: plan.w, d: 3.2, r: 1 },
     { x: plan.x, y: plan.y + plan.d - 3.2, w: plan.w, d: 3.2, r: 1 },
-    { x: plan.x, y: plan.y, w: 3.2, d: plan.d, r: 1 },
     { x: plan.x + plan.w - 3.2, y: plan.y, w: 3.2, d: plan.d, r: 1 },
   ]) {
     out.push(S(k.slabOf(bar, floor, PAN_H, P, 3, 0.5), { tone: "lo" }));
-    shapes.push(A.slab(bar, floor, PAN_H, { name: `stand.panwall.${side}`, owner: "rig" }));
+    shapes.push(A.slab(bar, floor, PAN_H, { name: `stand.panwall.${side}.near`, owner: "rig" }));
   }
   // The rim's top edge.
   out.push(L(k.planOutline(k.insetPlan(plan, 0), rim, P), { tone: "lo" }));
 
-  // A rule along the near rim, so the tray is not a bare face.
-  out.push(L(k.lineOnTop([plan.x + 3.2, plan.y + 6], [plan.x + SPAN - 3.2, plan.y + 6], rim, P), { tone: "faint" }));
+  // A rule along the near rim, so the pan is not a bare face. It runs from
+  // wall to wall, so both of its ends land on a wall's inner edge.
+  out.push(L(k.lineOnTop([plan.x + 3.2, plan.y + plan.d - 1.6], [plan.x + PAN_SPAN - 3.2, plan.y + plan.d - 1.6], rim, P), { tone: "faint" }));
 
   // The one mark in the drawing: the threat side is counted twice.
   if (side === "threat") {
     out.push(k.faceTextSvg(
-      k.sideMatrix([plan.x + 26, plan.y + SPAN], floor + 5, P, "left"),
+      k.sideMatrix([plan.x + 12, plan.y + PAN_SPAN], floor + 4, P, "left"),
       "\u00d72",
-      { size: 9, tone: "hi" },
+      { size: 5.5, tone: "hi" },
     ));
   }
 
@@ -268,42 +289,51 @@ function panCords(side) {
   const shapes = [];
   const end = END[side];
   const rim = RIM[side];
-  // The cord leaves the collar from inside it, so the collar is always in
-  // front of the cord where the two meet.
+  // The cord leaves just clear of the collar, so the collar reads as the
+  // eye the pan hangs from.
   const outward = side === "food" ? [-CT, 0, ST] : [CT, 0, -ST];
   const start = [end[0] + outward[0] * 1.5 - ST * CORD_DOWN, end[1], end[2] + outward[2] * 1.5 - CT * CORD_DOWN];
   for (const [dx, dy] of [[-1, 1], [1, 1], [-1, -1], [1, -1]]) {
-    const corner = [end[0] + dx * (SPAN / 2 - 1.6), end[1] + dy * (SPAN / 2 - 1.6), rim + 1.1];
-    const cord = rod(start, corner, CORD_R, "mid", `rig.cord.${side}.${dx}.${dy}`);
+    const cx = end[0] + dx * (PAN_SPAN / 2 - 1.6);
+    const cy = end[1] + dy * (PAN_SPAN / 2 - 1.6);
+    // The cord is seated so that its surface just kisses the rim: the end of
+    // the rod hangs a little above the rim, and the rod's own thickness
+    // brings it down onto it.
+    const run = Math.abs(cx - start[0]);
+    const span = start[2] - rim;
+    let lift = (CORD_R * run) / Math.hypot(run, span);
+    for (let step = 0; step < 6; step++) lift = (CORD_R * run) / Math.hypot(run, span - lift);
+    const corner = [cx, cy, rim + lift];
+    const cord = rod(start, corner, CORD_R, "lo", `rig.cord.${side}.${dx}.${dy}`);
     out.push(cord.svg);
     shapes.push(cord.shape);
   }
   return { svg: out.join(""), shapes };
 }
 
-// The mound: one standing cell per cell of the channel.
-function panMound(side, cells, scale, tone) {
+// ------------------------------------------------------------------ the load
+// The channel a pan carries. The Dome kernel is a paraboloid and the Cone
+// kernel a cone - roundAt() in model.mjs is exactly h = H(1 - r/R) for the
+// cone and h = H(1 - r^2/R^2) for the dome - so the pans hold the shapes Gi
+// actually stamps. The threat cone stands twice as tall, because the formula
+// counts the threat twice.
+function loadProfile(kind, h) {
+  if (kind === "Cone") return [[0, LOAD_R], [h, 0]];
+  const prof = [];
+  for (let i = 0; i <= 9; i++) {
+    const s = (h * i) / 9;
+    prof.push([s, LOAD_R * Math.sqrt(Math.max(0, 1 - s / h)), 1]);
+  }
+  return prof;
+}
+
+function panLoad(side, kind, height, tone) {
   const out = [];
   const shapes = [];
-  const plan = PLAN[side];
-  const floor = FLOOR[side];
-  const blocks = [];
-  for (const [key, value] of cells) {
-    const [i, j] = key.split(",").map(Number);
-    const h = (value / PEAK) * scale;
-    if (h < 0.2) continue;
-    blocks.push({ i, j, h, x: plan.x + i * CELLU, y: plan.y + j * CELLU });
-  }
-  blocks.sort(
-    (a, b) =>
-      k.depthOf([a.x + CELLU / 2, a.y + CELLU / 2, floor], P) -
-      k.depthOf([b.x + CELLU / 2, b.y + CELLU / 2, floor], P),
-  );
-  for (const block of blocks) {
-    const cell = { x: block.x + 0.16, y: block.y + 0.16, w: CELLU - 0.32, d: CELLU - 0.32, r: 0.3 };
-    out.push(S(k.slabOf(cell, floor, block.h, P, 2, 0.22), { tone, crease: "faint" }));
-    shapes.push(A.slab(cell, floor, block.h, { name: `stand.cell.${side}.${block.i}.${block.j}`, owner: "rig" }));
-  }
+  const F = G.frameAlong([END[side][0], PIVOT.y, FLOOR[side]], [0, 0, 1]);
+  const prof = loadProfile(kind, height);
+  out.push(S(G.solidOf(prof, F, P, { steps: 56 }), { tone, face: true }));
+  shapes.push(A.solid(F, prof, { name: `stand.load.${side}`, owner: "rig" }));
   return { svg: out.join(""), shapes };
 }
 
@@ -371,23 +401,27 @@ function peg() {
 // ------------------------------------------------------------------ the scene
 const basePart = base();
 const balancePart = balance();
-const foodTray = panTray("food");
+const foodPanFloor = panFloor("food");
 const foodCords = panCords("food");
-const foodMound = panMound("food", MODEL.food, MOUND, "hi");
-const threatTray = panTray("threat");
+const foodLoad = panLoad("food", "Dome", LOAD_H, "hi");
+const foodPanNear = panNear("food");
+const threatPanFloor = panFloor("threat");
 const threatCords = panCords("threat");
-const threatMound = panMound("threat", MODEL.threat, MOUND * THREAT_WEIGHT, "mid");
+const threatLoad = panLoad("threat", "Cone", LOAD_H * THREAT_WEIGHT, "mid");
+const threatPanNear = panNear("threat");
 const pagePart = pageTray();
 const pegPart = peg();
 
 put("base", "rig", [BASE.x + BASE.w / 2, BASE.y + BASE.d / 2, 0], basePart.svg, basePart.shapes);
 put("balance", "rig", [PIVOT.x, PIVOT.y, PIVOT.z], balancePart.svg, balancePart.shapes);
 put("cords-food", "rig", [END.food[0], PIVOT.y, RIM.food - 20], foodCords.svg, foodCords.shapes);
-put("pan-food", "rig", [END.food[0], PIVOT.y, FLOOR.food], foodTray.svg, foodTray.shapes);
-put("mound-food", "rig", [END.food[0], PIVOT.y, FLOOR.food], foodMound.svg, foodMound.shapes);
+put("pan-food", "rig", [END.food[0], PIVOT.y, FLOOR.food], foodPanFloor.svg, foodPanFloor.shapes);
+put("load-food", "rig", [END.food[0], PIVOT.y, FLOOR.food], foodLoad.svg, foodLoad.shapes);
+put("panfood-food", "rig", [END.food[0], PIVOT.y, RIM.food], foodPanNear.svg, foodPanNear.shapes);
 put("cords-threat", "rig", [END.threat[0], PIVOT.y, RIM.threat - 20], threatCords.svg, threatCords.shapes);
-put("pan-threat", "rig", [END.threat[0], PIVOT.y, FLOOR.threat], threatTray.svg, threatTray.shapes);
-put("mound-threat", "rig", [END.threat[0], PIVOT.y, FLOOR.threat], threatMound.svg, threatMound.shapes);
+put("pan-threat", "rig", [END.threat[0], PIVOT.y, FLOOR.threat], threatPanFloor.svg, threatPanFloor.shapes);
+put("load-threat", "rig", [END.threat[0], PIVOT.y, FLOOR.threat], threatLoad.svg, threatLoad.shapes);
+put("panwall-threat", "rig", [END.threat[0], PIVOT.y, RIM.threat], threatPanNear.svg, threatPanNear.shapes);
 put("page", "rig", [PAGE.x + PAGE.w / 2, PAGE.y + PAGE.d / 2, PAGE_BASE + PAGE_T], pagePart.svg, pagePart.shapes);
 put("peg", "rig", [PEG.x, PEG.y, PEG.z], `<g data-part="peg">${pegPart.svg}</g>`, pegPart.shapes);
 
@@ -420,7 +454,7 @@ const svg = k.figureSvg({
   width: WIDTH,
   height: HEIGHT,
   label:
-    "A beam balance with a pan on each arm. The left pan carries the food channel, a dome of standing cells; the right pan carries the threat channel, a cone of standing cells twice as tall because the formula counts the threat twice. The beam leans by the ratio of the two loads, and the derived page beside it carries the difference engraved cell by cell, with a lit peg in the cell that holds the maximum.",
+    "A beam balance with a pan on each arm. The left pan carries the food channel, the paraboloid a Dome kernel stamps; the right pan carries the threat channel, a cone twice as tall because the formula counts the threat twice. The beam leans by the ratio of the two loads, and the derived page beside it carries the difference engraved cell by cell, with a lit peg in the cell that holds the maximum.",
   body: [bodySvg],
 });
 
@@ -490,9 +524,11 @@ function tick(now) {
   if (upto !== shown) {
     shown = upto;
     drawCells(upto);
+    // The peg hovers over its cell while the page is being filled and drops
+    // into it when the sweep finishes. It is never hidden: it is the answer.
     const drop = progress < 1 ? 1 : 0;
     peg.setAttribute("transform", translateAlong(P, [0, 0, drop * 7]));
-    peg.setAttribute("opacity", progress < 1 ? "0" : "1");
+    peg.setAttribute("opacity", "1");
   }
   frame = visible ? requestAnimationFrame(tick) : 0;
 }
@@ -535,7 +571,7 @@ const card = k.plateHtml({
   readout: "food 5058 · threat 3398 · safety −1738 · best 90 at (9,9)",
   keys: [
     { mark: "lit", label: "The peg: the cell of the derived layer that holds its maximum" },
-    { mark: "raised", label: "One channel, standing cell by cell: the food dome and the threat cone" },
+    { mark: "raised", label: "One channel in each pan: the food dome and the threat cone" },
   ],
   caption:
     "A derived layer is an ordinary layer whose cells always equal a formula over other layers: food minus twice the threat. The two channels are weighed against each other - the threat side carries its cone twice over, because the formula counts it twice - and the beam leans by the ratio of the two loads. The page beside them carries the difference cell by cell: 199 of the 1 024 cells are not zero, and every query that works on a deposited layer works on this one too, maximum included.",
@@ -546,8 +582,8 @@ const NOTES = `
 <div class="notes">
   <h2>What the figure shows</h2>
   <ul>
-    <li>The <strong>left pan</strong> carries the food channel: a <code>Dome</code> stamped at cell (9,9), its 109 cells standing at their own value.</li>
-    <li>The <strong>right pan</strong> carries the threat channel: a <code>Cone</code> stamped at cell (15,15). Its cells stand twice as tall, because <code>Layer.Sum(world, food, 1, threat, -2)</code> counts the threat twice.</li>
+    <li>The <strong>left pan</strong> carries the food channel: a <code>Dome</code> stamped at cell (9,9). The kernel is a paraboloid, <code>h = H(1 - r²/R²)</code>, so the pan holds exactly the shape Gi stamps.</li>
+    <li>The <strong>right pan</strong> carries the threat channel: a <code>Cone</code> stamped at cell (15,15), <code>h = H(1 - r/R)</code>. It stands twice as tall, because <code>Layer.Sum(world, food, 1, threat, -2)</code> counts the threat twice.</li>
     <li>The <strong>beam</strong> leans by the ratio of the two loads: 5 058 of food against 6 796 of threat, so 8.3° toward the threat. That lean is the tile's net, −1 738.</li>
     <li>The <strong>page</strong> is the derived layer itself: the formula applied to each of the 1 024 cells. 199 of them are not zero - 97 safe, 102 owned by the threat - and the <strong>peg</strong> stands where the layer holds its maximum of 90.</li>
   </ul>

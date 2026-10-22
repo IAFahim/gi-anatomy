@@ -32,6 +32,7 @@
 .iso-svg path,.iso-svg circle{vector-effect:non-scaling-stroke}
 .iso-fill{fill:var(--anatomy-paper);stroke:none}
 .iso-solid[data-lit]>.iso-fill{fill:var(--anatomy-face)}
+.iso-solid[data-face]>.iso-fill{fill:var(--anatomy-face)}
 .iso-shade,.iso-top{stroke:none}
 .iso-shade[data-shade="0"]{fill:var(--anatomy-shade-0)}
 .iso-shade[data-shade="1"]{fill:var(--anatomy-shade-1)}
@@ -117,10 +118,10 @@
 html{color-scheme:dark}
 body[data-theme="light"]{color-scheme:light}
 body{margin:0;background:var(--anatomy-page);color:var(--anatomy-text);font:14px/1.65 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
-.iso-page{width:min(720px,100% - 32px);margin:56px auto 96px}
+.iso-page{width:min(980px,100% - 32px);margin:56px auto 96px}
 .iso-page.wide{width:min(980px,100% - 32px)}
 
-.site-head{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;width:min(720px,100% - 32px);margin:28px auto 0;padding-bottom:14px;border-bottom:1px solid #ffffff12}
+.site-head{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;width:min(980px,100% - 32px);margin:28px auto 0;padding-bottom:14px;border-bottom:1px solid #ffffff12}
 .site-head.wide{width:min(980px,100% - 32px)}
 .site-title{font:600 13px/1.4 var(--anatomy-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--anatomy-strong);text-decoration:none}
 .site-title span{color:var(--anatomy-muted)}
@@ -593,7 +594,7 @@ const attrs = (pairs) => Object.entries(pairs)
     .filter(([, value]) => value !== undefined && value !== false)
     .map(([key, value]) => ` ${key}="${escape(String(value))}"`)
     .join("");
-function solidSvg(paths, { tone = "hi", crease = "faint", halo = false, lit = false, flat = false, className, inner = "" } = {}) {
+function solidSvg(paths, { tone = "hi", crease = "faint", halo = false, lit = false, face = false, flat = false, className, inner = "" } = {}) {
     const parts = [];
     if (halo)
         parts.push(`<path class="iso-halo" d="${paths.fill}"/>`);
@@ -612,7 +613,7 @@ function solidSvg(paths, { tone = "hi", crease = "faint", halo = false, lit = fa
     if (inner)
         parts.push(inner);
     parts.push(`<path class="iso-line iso-edge" data-tone="${tone}" d="${paths.outline}"/>`);
-    return `<g${attrs({ class: className ? `iso-solid ${className}` : "iso-solid", "data-lit": lit ? "" : undefined, "data-seamless": paths.seamless ? "" : undefined })}>${parts.join("")}</g>`;
+    return `<g${attrs({ class: className ? `iso-solid ${className}` : "iso-solid", "data-lit": lit ? "" : undefined, "data-face": face ? "" : undefined, "data-seamless": paths.seamless ? "" : undefined })}>${parts.join("")}</g>`;
 }
 function lineSvg(d, { tone = "lo", dotted = false, dashed = false, flow = false, className, free } = {}) {
     if (!d)
@@ -772,6 +773,7 @@ const ISO_CSS = `
 .iso-svg path,.iso-svg circle{vector-effect:non-scaling-stroke}
 .iso-fill{fill:var(--anatomy-paper);stroke:none}
 .iso-solid[data-lit]>.iso-fill{fill:var(--anatomy-face)}
+.iso-solid[data-face]>.iso-fill{fill:var(--anatomy-face)}
 .iso-shade,.iso-top{stroke:none}
 .iso-shade[data-shade="0"]{fill:var(--anatomy-shade-0)}
 .iso-shade[data-shade="1"]{fill:var(--anatomy-shade-1)}

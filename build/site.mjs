@@ -42,10 +42,10 @@ export const SITE_CSS = `
 html{color-scheme:dark}
 body[data-theme="light"]{color-scheme:light}
 body{margin:0;background:var(--anatomy-page);color:var(--anatomy-text);font:14px/1.65 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
-.iso-page{width:min(720px,100% - 32px);margin:56px auto 96px}
+.iso-page{width:min(980px,100% - 32px);margin:56px auto 96px}
 .iso-page.wide{width:min(980px,100% - 32px)}
 
-.site-head{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;width:min(720px,100% - 32px);margin:28px auto 0;padding-bottom:14px;border-bottom:1px solid #ffffff12}
+.site-head{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;width:min(980px,100% - 32px);margin:28px auto 0;padding-bottom:14px;border-bottom:1px solid #ffffff12}
 .site-head.wide{width:min(980px,100% - 32px)}
 .site-title{font:600 13px/1.4 var(--anatomy-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--anatomy-strong);text-decoration:none}
 .site-title span{color:var(--anatomy-muted)}

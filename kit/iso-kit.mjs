@@ -412,7 +412,7 @@ const attrs = (pairs) => Object.entries(pairs)
     .filter(([, value]) => value !== undefined && value !== false)
     .map(([key, value]) => ` ${key}="${escape(String(value))}"`)
     .join("");
-export function solidSvg(paths, { tone = "hi", crease = "faint", halo = false, lit = false, flat = false, className, inner = "" } = {}) {
+export function solidSvg(paths, { tone = "hi", crease = "faint", halo = false, lit = false, face = false, flat = false, className, inner = "" } = {}) {
     const parts = [];
     if (halo)
         parts.push(`<path class="iso-halo" d="${paths.fill}"/>`);
@@ -431,7 +431,7 @@ export function solidSvg(paths, { tone = "hi", crease = "faint", halo = false, l
     if (inner)
         parts.push(inner);
     parts.push(`<path class="iso-line iso-edge" data-tone="${tone}" d="${paths.outline}"/>`);
-    return `<g${attrs({ class: className ? `iso-solid ${className}` : "iso-solid", "data-lit": lit ? "" : undefined, "data-seamless": paths.seamless ? "" : undefined })}>${parts.join("")}</g>`;
+    return `<g${attrs({ class: className ? `iso-solid ${className}` : "iso-solid", "data-lit": lit ? "" : undefined, "data-face": face ? "" : undefined, "data-seamless": paths.seamless ? "" : undefined })}>${parts.join("")}</g>`;
 }
 export function lineSvg(d, { tone = "lo", dotted = false, dashed = false, flow = false, className, free } = {}) {
     if (!d)
@@ -591,6 +591,7 @@ export const ISO_CSS = `
 .iso-svg path,.iso-svg circle{vector-effect:non-scaling-stroke}
 .iso-fill{fill:var(--anatomy-paper);stroke:none}
 .iso-solid[data-lit]>.iso-fill{fill:var(--anatomy-face)}
+.iso-solid[data-face]>.iso-fill{fill:var(--anatomy-face)}
 .iso-shade,.iso-top{stroke:none}
 .iso-shade[data-shade="0"]{fill:var(--anatomy-shade-0)}
 .iso-shade[data-shade="1"]{fill:var(--anatomy-shade-1)}
