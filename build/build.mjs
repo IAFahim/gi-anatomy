@@ -20,7 +20,7 @@ const run = (file, args = []) => {
   execFileSync(process.execPath, [join(HERE, file), ...args], { stdio: "inherit" });
 };
 
-for (const figure of ["fig-bench.mjs", "fig-pyramid.mjs", "fig-planes.mjs"]) {
+for (const figure of ["fig-bench.mjs", "fig-pyramid.mjs", "fig-planes.mjs", "fig-balance.mjs"]) {
   run(figure, ["--audit"]);
 }
 run("index.mjs");
@@ -30,6 +30,7 @@ if (shots) {
     ["field-bench", "bench"],
     ["pyramid", "pyramid"],
     ["planes", "planes"],
+    ["balance", "balance"],
   ];
   for (const [file, name] of previews) {
     process.stdout.write(`> capture ${name}\n`);

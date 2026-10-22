@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Anatomy of Gi — how the grid-influence algorithm works</title>
-<meta name="description" content="Interactive isometric figures that explain Gi's algorithm: the change-rate deposit cycle, the max pyramid, and the planes a tile owns.">
+<meta name="description" content="Interactive isometric figures that explain Gi's algorithm: the change-rate deposit cycle, the planes a tile owns, the max pyramid a query descends, and the derived layer that combines two channels.">
 <style>
 .iso{
   --anatomy-page:#0b0b0b;--anatomy-card:#131313;--anatomy-text:#a3a3a3;--anatomy-strong:#e6e6e6;--anatomy-muted:#6e6e6e;
@@ -172,7 +172,7 @@ h2{font:500 15px/1.4 var(--anatomy-mono);letter-spacing:.1em;text-transform:uppe
   <li><strong>Process: re-emit only what changed.</strong> Process compares each marked source against the 16-byte record of what it last deposited. Where the two differ it adds the negated old taps and the new taps. Integer adds commute, so any sequence of mutations collapses to the same field. <span class="mono">Fig 1</span></li>
   <li><strong>Publish: the planes become cells.</strong> A tile owns four planes. They are summed into the short cells only at publish, and the sum is taken after summation, so a deposit that cancels another leaves exactly zero. Only the cells that differ are stored. <span class="mono">Fig 3</span></li>
   <li><strong>Query: descend, never scan.</strong> A region sum adds one int64 per fully covered tile. A best-cell query descends a max pyramid: root, node, tile, cell. Eighty numbers and one 2 048 B page stand in for a million cells. <span class="mono">Fig 2</span></li>
-  <li><strong>Combine: derived layers.</strong> A derived layer is a formula over other layers — food minus twice the threat. It is maintained only on the tiles whose inputs changed, and every query works on it as if it were any other layer.</li>
+  <li><strong>Combine: derived layers.</strong> A derived layer is a formula over other layers — food minus twice the threat. It is maintained only on the tiles whose inputs changed, and every query works on it as if it were any other layer. <span class="mono">Fig 4</span></li>
 </ol>
 
 <h2>The figures</h2>
@@ -200,7 +200,7 @@ h2{font:500 15px/1.4 var(--anatomy-mono);letter-spacing:.1em;text-transform:uppe
   </a>
 <a class="card" href="figures/balance.html">
     <span class="n">Fig 4</span>
-    
+    <img src="previews/balance.png" alt="" loading="lazy">
     <h3>The balance</h3>
     <p>A derived layer is a formula over other layers: food minus twice the threat. It is maintained only on the tiles whose inputs changed.</p>
     <span class="needs">how channels combine</span>

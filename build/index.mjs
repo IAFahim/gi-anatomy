@@ -36,7 +36,7 @@ const STEPS = [
     n: 5,
     title: "Combine: derived layers",
     text: "A derived layer is a formula over other layers — food minus twice the threat. It is maintained only on the tiles whose inputs changed, and every query works on it as if it were any other layer.",
-    fig: null,
+    fig: 4,
   },
 ];
 
@@ -88,7 +88,7 @@ ${FIGURES.map(card).join("\n")}
 for (const theme of ["dark", "light"]) {
   writeFileSync(join(SITE, theme === "light" ? "index-light.html" : "index.html"), sitePage({
     title: "Anatomy of Gi — how the grid-influence algorithm works",
-    description: "Interactive isometric figures that explain Gi's algorithm: the change-rate deposit cycle, the max pyramid, and the planes a tile owns.",
+    description: "Interactive isometric figures that explain Gi's algorithm: the change-rate deposit cycle, the planes a tile owns, the max pyramid a query descends, and the derived layer that combines two channels.",
     theme,
     active: "index",
     base: "",
